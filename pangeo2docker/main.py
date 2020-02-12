@@ -1,7 +1,11 @@
-import yaml
-from jinja2 import Template
 from pathlib import Path
 from typing import List, Dict
+import shutil
+
+from jinja2 import Template
+import repo2docker
+import yaml
+
 
 HERE = Path(__file__).parent
 
@@ -58,15 +62,13 @@ def translate(env):
 
 
 if __name__ == "__main__":
-    base = Path(".")
+    base = Path("binder")
     envs = read_conda(base)
     env = merge_conda(*envs)
     conda_packages = translate(env)
     apt_pkgs = read_apt(base)
     if apt_pkgs:
-        apt_pkgs = ' '.join(apt_pkgs.split('\n'))
-        apt = (f"RUN apt-get update && apt-get install -y "
-               f"{apt_pkgs} && aptrm -rf /var/lib/apt/lists/*")
+        apt = ' '.join(apt_pkgs.split('\n'))
     else:
         apt = ""
 
@@ -75,6 +77,8 @@ if __name__ == "__main__":
 
     apt_file = base.joinpath("apt.txt")
     dockerfile = template.render(apt=apt, conda_packages=conda_packages)
+    shutil.copy(repo2docker.buildpacks.base.ENTRYPOINT_FILE,
+                'repo2docker-entrypoint')
 
     with open("Dockerfile", "w") as f:
         f.write(dockerfile)
