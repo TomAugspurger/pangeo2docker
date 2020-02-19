@@ -49,6 +49,8 @@ WORKDIR ${REPO_DIR}
 RUN chmod +x binder/postBuild
 RUN ./binder/postBuild
 
+EXPOSE 8888
+
 COPY repo2docker-entrypoint /usr/local/bin/repo2docker-entrypoint
  # Add start script
 # RUN chmod +x "${REPO_DIR}/binder/start"
